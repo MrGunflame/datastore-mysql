@@ -7,6 +7,7 @@ use datastore::{DataDescriptor, DataQuery, Reader, Store, StoreData, TypeWriter,
 use futures::TryStreamExt;
 use sqlx::{mysql::MySqlRow, MySql, Pool, Row};
 
+/// A pooled [`Store`] for the MySQL database.
 #[derive(Clone, Debug)]
 pub struct MySqlStore {
     pool: Pool<MySql>,

@@ -1,3 +1,18 @@
+//! # datastore-mysql
+//!
+//! This crate provides [`MySqlStore`] which is a [`Store`] implementation using the MySQL
+//! database.
+//!
+//! [`MySqlStore`] supports these types:
+//! - `bool`
+//! - `i8`, `i16`, `i32`, `i64`
+//! - `u8`, `u16`, `u32`, `u64`
+//! - `f32`, `f64`
+//! - `&str`, `String`
+//! - `&[u8]`, `Vec<u8>`
+//!
+//! [`Store`]: datastore::Store
+
 use std::fmt::{self, Display, Formatter};
 
 mod mysql;
@@ -51,25 +66,6 @@ impl<'a> Query<'a> {
         };
 
         Self { table, inner }
-    }
-
-    #[inline]
-    pub fn kind(&self) -> QueryKind {
-        match self.inner {
-            QueryInner::Create {
-                columns: _,
-                values: _,
-            } => QueryKind::Create,
-            QueryInner::Delete { conditions: _ } => QueryKind::Delete,
-            QueryInner::Insert {
-                columns: _,
-                values: _,
-            } => QueryKind::Insert,
-            QueryInner::Select {
-                columns: _,
-                conditions: _,
-            } => QueryKind::Select,
-        }
     }
 
     pub fn push(&mut self, key: String, value: String) {

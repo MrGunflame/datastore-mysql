@@ -11,6 +11,36 @@
 //! - `&str`, `String`
 //! - `&[u8]`, `Vec<u8>`
 //!
+//! ## Examples
+//!
+//! ```
+//! use datastore::{Store, StoreExt, StoreData};
+//! use datastore_mysql::MySqlStore;
+//!
+//! #[derive(Debug, StoreData)]
+//! pub struct Person {
+//!     id: i64,
+//!     name: String,
+//! }
+//!
+//! #[tokio::main]
+//! async fn main() -> Result<(), Box<dyn std::error::Error>> {
+//!     let store = MySqlStore::connect("mysql://user:password@host/database").await?;
+//!
+//!     let person = Person {
+//!         id: 1,
+//!         name: String::from("Robb"),
+//!     };
+//!
+//!     store.insert(store.descriptor::<Person>(), person).await?;
+//!
+//!     let persons: Vec<Person> = store.get_all(store.descriptor::<Person>()).await?;
+//!     println!("{:?}", persons);
+//!
+//!     Ok(())
+//! }
+//! ```
+//!
 //! [`Store`]: datastore::Store
 
 use std::fmt::{self, Display, Formatter};

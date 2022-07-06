@@ -13,7 +13,7 @@
 //!
 //! ## Examples
 //!
-//! ```
+//! ```ignore
 //! use datastore::{Store, StoreExt, StoreData};
 //! use datastore_mysql::MySqlStore;
 //!

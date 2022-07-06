@@ -2,6 +2,14 @@
 name = "datastore-mysql"
 version = "0.1.0"
 edition = "2021"
+description = "A datastore Store using the MySQL database"
+authors = ["MrGunflame <mrgunflame@protonmail.com>"]
+license = "MIT OR Apache-2.0"
+
+documentation = "https://docs.rs/datastore-mysql"
+repository = "https://github.com/MrGunflame/datastore-mysql"
+
+publish = true
 
 [dependencies]
 datastore = "0.1.4"

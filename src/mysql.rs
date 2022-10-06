@@ -1,6 +1,7 @@
-use std::{convert::Infallible, fmt::Write as _};
+use std::convert::Infallible;
+use std::fmt::{Debug, Write as _};
 
-use crate::{Comparator, Condition, Query, QueryKind};
+use crate::{Comparator, Condition, Error, ErrorKind, Query, QueryKind};
 
 use async_trait::async_trait;
 use datastore::{DataDescriptor, DataQuery, Reader, Store, StoreData, TypeWriter, Write, Writer};
@@ -16,10 +17,12 @@ pub struct MySqlStore {
 #[async_trait]
 impl Store for MySqlStore {
     type DataStore = Self;
-    type Error = sqlx::Error;
+    type Error = Error;
 
     async fn connect(uri: &str) -> Result<Self, Self::Error> {
-        let pool = Pool::connect(uri).await?;
+        let pool = Pool::connect(uri)
+            .await
+            .map_err(|err| Error(ErrorKind::Sqlx(err)))?;
 
         Ok(Self { pool })
     }
@@ -36,7 +39,10 @@ impl Store for MySqlStore {
         let sql = writer.sql();
         log::debug!("Executing sql CREATE query: \"{}\"", sql);
 
-        sqlx::query(&sql).execute(&self.pool).await?;
+        sqlx::query(&sql)
+            .execute(&self.pool)
+            .await
+            .map_err(|err| Error(ErrorKind::Sqlx(err)))?;
         Ok(())
     }
 
@@ -54,7 +60,10 @@ impl Store for MySqlStore {
         let sql = writer.sql();
         log::debug!("Executing sql DELETE query: \"{}\"", sql);
 
-        sqlx::query(&sql).execute(&self.pool).await?;
+        sqlx::query(&sql)
+            .execute(&self.pool)
+            .await
+            .map_err(|err| Error(ErrorKind::Sqlx(err)))?;
         Ok(())
     }
 
@@ -78,7 +87,11 @@ impl Store for MySqlStore {
         let mut rows = sqlx::query(&sql).fetch(&self.pool);
 
         let mut entries = Vec::new();
-        while let Some(row) = rows.try_next().await? {
+        while let Some(row) = rows
+            .try_next()
+            .await
+            .map_err(|err| Error(ErrorKind::Sqlx(err)))?
+        {
             let mut reader = MySqlReader::new(row);
             let data = T::read(&mut reader).unwrap();
 
@@ -103,9 +116,13 @@ impl Store for MySqlStore {
         let mut rows = sqlx::query(&sql).fetch(&self.pool);
 
         let mut entries = Vec::new();
-        while let Some(row) = rows.try_next().await? {
+        while let Some(row) = rows
+            .try_next()
+            .await
+            .map_err(|err| Error(ErrorKind::Sqlx(err)))?
+        {
             let mut reader = MySqlReader::new(row);
-            let data = T::read(&mut reader)?;
+            let data = T::read(&mut reader).map_err(|err| Error(ErrorKind::Sqlx(err)))?;
 
             entries.push(data);
         }
@@ -133,11 +150,11 @@ impl Store for MySqlStore {
         let row = match sqlx::query(&sql).fetch_one(&self.pool).await {
             Ok(row) => row,
             Err(sqlx::Error::RowNotFound) => return Ok(None),
-            Err(err) => return Err(err.into()),
+            Err(err) => return Err(Error(ErrorKind::Sqlx(err))),
         };
 
         let mut reader = MySqlReader::new(row);
-        let data = T::read(&mut reader)?;
+        let data = T::read(&mut reader).map_err(|err| Error(ErrorKind::Sqlx(err)))?;
 
         Ok(Some(data))
     }
@@ -155,7 +172,10 @@ impl Store for MySqlStore {
         let sql = writer.sql();
         log::debug!("Executing sql INSERT query: \"{}\"", sql);
 
-        sqlx::query(&sql).execute(&self.pool).await?;
+        sqlx::query(&sql)
+            .execute(&self.pool)
+            .await
+            .map_err(|err| Error(ErrorKind::Sqlx(err)))?;
         Ok(())
     }
 }

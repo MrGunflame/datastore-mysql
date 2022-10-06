@@ -50,6 +50,36 @@ mod types;
 
 pub use mysql::MySqlStore;
 
+#[derive(Debug)]
+pub struct Error(ErrorKind);
+
+impl Display for Error {
+    #[inline]
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        match &self.0 {
+            ErrorKind::Sqlx(err) => write!(f, "{}", err),
+            ErrorKind::Custom(s) => write!(f, "{}", s),
+        }
+    }
+}
+
+impl std::error::Error for Error {}
+
+impl datastore::Error for Error {
+    fn custom<T>(msg: T) -> Self
+    where
+        T: Display,
+    {
+        Self(ErrorKind::Custom(msg.to_string()))
+    }
+}
+
+#[derive(Debug)]
+pub(crate) enum ErrorKind {
+    Sqlx(sqlx::Error),
+    Custom(String),
+}
+
 #[derive(Clone, Debug)]
 struct Query<'a> {
     table: &'a str,

@@ -12,12 +12,12 @@ repository = "https://github.com/MrGunflame/datastore-mysql"
 publish = true
 
 [dependencies]
-datastore = "0.1.4"
-sqlx = { version = "0.5.13", features = ["mysql", "runtime-tokio-rustls"] }
-async-trait = "0.1.53"
+datastore = "0.1.5"
+sqlx = { version = "0.6.2", features = ["mysql", "runtime-tokio-rustls"] }
+async-trait = "0.1.57"
 log = "0.4.17"
-futures = "0.3.21"
+futures = "0.3.24"
 
 [dev-dependencies]
-datastore = { version = "0.1.4", features = ["derive"] }
-tokio = { version = "1.19.2", features = ["macros"] }
+datastore = { version = "0.1.5", features = ["derive"] }
+tokio = { version = "1.21.2", features = ["macros"] }
